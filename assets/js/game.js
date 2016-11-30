@@ -1,8 +1,8 @@
 var player, playerDamage = 1, cursors, 
     bullets, bulletTime = 0,
     fireButton, friendAndFoe,
-    asteroids, maxAsteroids = 3,
-    ufos, maxUfos = 4, ufoBullets,
+    asteroids, maxAsteroids = 1,
+    ufos, maxUfos = 2, ufoBullets, ufoBulletTime, ufoDamage = 2,
     explosions;
 
 var Game = {
@@ -11,6 +11,7 @@ var Game = {
         game.load.image('player', 'assets/images/player.png');
         game.load.image('asteroid', 'assets/images/asteroid_1.png');
         game.load.image('bullet', 'assets/images/bulletSmall.png');
+        game.load.image('ufoBullet', 'assets/images/laserRed16.png');
         game.load.image('ufo', 'assets/images/ufoEnemy.png');
         game.load.spritesheet('kaboom', 'assets/images/explode.png', 128, 128);
     },
@@ -60,10 +61,14 @@ var Game = {
             fireBullet();
         }
 
+        // ufos.forEach(function(ufo) {
+        //     fireUfoBullet(ufo);
+        // });
+
         game.physics.arcade.overlap(bullets, asteroids, collisionHandler, null, this);
         game.physics.arcade.overlap(player, asteroids, collisionWithAsteroids, null, this);
         game.physics.arcade.overlap(bullets, ufos, collisionHandler, null, this);
-        
+        game.physics.arcade.overlap(player, ufoBullets, collisionHandler, null, this);
     }
 };
 
@@ -76,12 +81,12 @@ function createPlayer() {
     player.body.drag.set(70);
     player.body.maxVelocity.set(300);
     player.body.collideWorldBounds = true;
-    player.body.bounce.set(0.5);
+    player.body.bounce.set(1.1);
 
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(30, 'bullet');
+    bullets.createMultiple(60, 'bullet');
     bullets.setAll('anchor.x', 0.5);
     bullets.setAll('anchor.y', 0.5);
     bullets.setAll('outOfBoundsKill', true);
@@ -97,7 +102,7 @@ function createAsteroids() {
 
 function spawnAsteroids() {  
     for(let i = 0; i < maxAsteroids; i++) {
-        var asteroid = asteroids.create(360 + Math.random() * 400, 120 + Math.random() * 400, 'asteroid');
+        var asteroid = asteroids.create(120 + Math.random() * 2280, 120 + Math.random() * 1600, 'asteroid');
         asteroid.health = 50;
         asteroid.body.angularVelocity = game.rnd.integerInRange(0, 200);
         asteroid.anchor.set(0.5,0.5);
@@ -124,11 +129,20 @@ function createUfo() {
     ufos.enableBody = true;
     ufos.physicsBodyType = Phaser.Physics.ARCADE;
     spawnUfos();
+
+    ufoBullets = game.add.group();
+    ufoBullets.enableBody = true;
+    ufoBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    ufoBullets.createMultiple(60, 'ufoBullet');
+    ufoBullets.setAll('anchor.x', 0.5);       
+    ufoBullets.setAll('anchor.y', 0.5);
+    ufoBullets.setAll('outOfBoundsKill', true);
+    ufoBullets.setAll('checkWorldBounds', true);
 }
 
 function spawnUfos() {
     for(let i = 0; i < maxUfos; i++) {
-        var ufo = ufos.create(360 + Math.random() * 400, 120 + Math.random() * 400, 'ufo');
+        var ufo = ufos.create(120 + Math.random() * 2280, 120 + Math.random() * 1600, 'ufo');
         ufo.health = 30;
         ufo.body.angularVelocity = game.rnd.integerInRange(0, 200);
         ufo.anchor.set(0.5,0.5);
@@ -142,10 +156,9 @@ function spawnUfos() {
 }
 
 function fireBullet () {
- 
     if (game.time.now > bulletTime)
     {
-        bullet = bullets.getFirstExists(false);
+        var bullet = bullets.getFirstExists(false);
  
         if (bullet)
         {
@@ -157,10 +170,41 @@ function fireBullet () {
             bullet.rotation = player.rotation;
                
             game.physics.arcade.velocityFromRotation(player.rotation, 500, bullet.body.velocity); //speed in the middle
-            bulletTime = game.time.now + 200;
+            bulletTime = game.time.now + 100;
         }
     }
- 
+}
+
+// function fireUfoBullet(ufo) {
+//         var bullet = ufoBullets.getFirstExists(false);
+//         if(bullet) {
+//             var length = ufo.width * 0.5;
+//             var x = ufo.x + (Math.cos(ufo.rotation) * length);
+//             var y = ufo.y + (Math.sin(ufo.rotation) * length);
+               
+//             bullet.reset(x, y);
+//             bullet.rotation = ufo.rotation;
+               
+//             game.physics.arcade.velocityFromRotation(ufo.rotation, 500, ufo.body.velocity); //speed in the middle
+//             ufoBulletTime = game.time.now + 200;
+//         }
+// }
+
+function colisionWithEnemyBullet(obj, bullet) {
+    var explosionBullet, explosionObj;
+    explosionBullet = explosions.getFirstExists(false);
+    explosionBullet.scale.setTo(0.5,0.5);
+    explosionBullet.reset(bullet.body.x, bullet.body.y);
+    explosionBullet.play('kaboom', 100, false, true);
+
+    bullet.kill();
+    obj.damage(ufoDamage);
+
+    if(obj.health <= 0) {
+        explosionObj = explosions.getFirstExists(false);
+        explosionObj.reset(bullet.body.x, bullet.body.y);
+        explosionObj.play('kaboom', 30, false, true);
+    }
 }
 
 function collisionHandler (bullet, enemy) {

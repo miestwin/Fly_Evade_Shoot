@@ -16,8 +16,8 @@ var Menu = {
     create: function() {
 
         if(!platformer2) {
-            //platformer2 = game.add.audio('platformer2', 1, true);
-            //platformer2.play();
+            platformer2 = game.add.audio('platformer2', 1, true);
+            platformer2.play();
         }
 
         star = game.make.sprite(0,0,'tinystar');
