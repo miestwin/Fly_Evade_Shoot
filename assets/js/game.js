@@ -2,7 +2,7 @@ var player, playerDamage = 1, cursors,
     bullets, bulletTime = 0,
     fireButton, friendAndFoe,
     asteroids, maxAsteroids = 1,
-    ufos, maxUfos = 2, ufoBullets, ufoFiringTime = 500, ufoDamage = 2,
+    ufos, maxUfos = 2, ufoBullets, ufoFiringTime = 0, ufoDamage = 2,
     explosions;
 
 var Game = {
@@ -11,7 +11,7 @@ var Game = {
         game.load.image('player', 'assets/images/player.png');
         game.load.image('asteroid', 'assets/images/asteroid_1.png');
         game.load.image('bullet', 'assets/images/bulletSmall.png');
-        game.load.image('ufoBullet', 'assets/images/laserRed16.png');
+        game.load.image('ufoBullet', 'assets/images/enemy-bullet.png');
         game.load.image('ufo', 'assets/images/ufoEnemy.png');
         game.load.spritesheet('kaboom', 'assets/images/explode.png', 128, 128);
     },
@@ -68,9 +68,9 @@ var Game = {
         });
 
         game.physics.arcade.overlap(bullets, asteroids, collisionHandler, null, this);
-        //game.physics.arcade.overlap(player, asteroids, collisionWithAsteroids, null, this);
+        game.physics.arcade.overlap(player, asteroids, collisionWithAsteroids, null, this);
         game.physics.arcade.overlap(bullets, ufos, collisionHandler, null, this);
-        //game.physics.arcade.overlap(ufoBullets, player, collisionWithUfoBullet, null, this);
+        game.physics.arcade.overlap(ufoBullets, player, collisionWithUfoBullet, null, this);
     }
 };
 
@@ -182,18 +182,18 @@ function fireUfoBullet(ufo) {
         var bullet = ufoBullets.getFirstExists(false);
         if(bullet) {
 
-            bullet.scale.setTo(0.7,0.7);
+            bullet.scale.setTo(1.8,1.8);
 
             var length = ufo.width * 0.5;
-            var x = ufo.body.x;// + (Math.cos(player.body.y) * length);
-            var y = ufo.body.y;// + (Math.sin(player.body.x) * length);
+            var x = ufo.body.x + length;//(Math.cos(Math.atan2(player.body.y - ufo.body.y, player.body.x - ufo.body.x) * (180 / Math.PI)) * length);
+            var y = ufo.body.y + length;//(Math.sin(Math.atan2(player.body.y - ufo.body.y, player.body.x - ufo.body.x) * (180 / Math.PI)) * length);
                
             bullet.reset(x, y);
             //bullet.rotation = player.rotation;
-            bullet.angle = Math.atan2(player.body.y - y, player.body.x - x) * (180 / Math.PI);
+            //bullet.angle = Math.atan2(player.body.y - y, player.body.x - x) * (180 / Math.PI);
                
             game.physics.arcade.moveToObject(bullet, player, 120); 
-            ufoFiringTime = game.time.now + 500;
+            ufoFiringTime = game.time.now + 400;
         }
 }
 
