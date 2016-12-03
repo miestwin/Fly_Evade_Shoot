@@ -289,6 +289,7 @@ var Game = {
     },
 
     endGame: function() {
+        game.paused = true;
         titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
         titleOver.anchor.set(0.5,0.5);
         titleOver.fixedToCamera = true;
@@ -298,7 +299,6 @@ var Game = {
         goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.goToMenu, this);
         goToMenu.anchor.set(0.5,0.5);
         goToMenu.fixedToCamera = true;
-        game.paused = true;
     },
 
     goToMenu: function() {
