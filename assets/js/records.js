@@ -2,7 +2,7 @@ var back, records_title;
 
 var Records = {
     preload: function() {
-        game.load.image('tinystar', 'assets/images/tinystar.png');
+        //game.load.image('tinystar', 'assets/images/tinystar.png');
         game.load.image('back', 'assets/images/back.png');
         game.load.image('records_title', 'assets/images/records_title.png');
         game.load.bitmapFont('carrier_command', 'assets/fonts/carrier_command.png', 'assets/fonts/carrier_command.xml');
@@ -60,6 +60,6 @@ var Records = {
     },
 
     backToMenu: function() {
-        this.state.start('Menu');
+        this.state.start('Menu', true, false);
     }
 };

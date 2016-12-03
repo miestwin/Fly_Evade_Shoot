@@ -20,9 +20,9 @@ var Menu = {
             //platformer2.play();
         }
 
-        star = game.make.sprite(0,0,'tinystar');
+        star = game.make.sprite(0, 0, 'tinystar');
         texture = game.add.renderTexture(900, 600, 'texture');
-        game.add.sprite(0,0,texture);
+        game.add.sprite(0, 0, texture);
 
         for(let i = 0; i < max; i++) {
             xx[i] = Math.floor(Math.random() * 900) - 400;
@@ -47,7 +47,7 @@ var Menu = {
             let perspective = distance / (distance - zz[i]);
             let x = game.world.centerX + xx[i] * perspective;
             let y = game.world.centerY + yy[i] * perspective;
-
+            
             zz[i] += speed;
 
             if(zz[i] > 300) {
@@ -59,10 +59,10 @@ var Menu = {
     },
 
     startGame: function() {
-        this.state.start('Game');
+        this.state.start('Game', true, false);
     },
 
     showRecords: function() {
-        this.state.start('Records');
+        this.state.start('Records', true, false);
     }
 };

@@ -10,6 +10,8 @@ var explosions;
 
 var scoreText, health, score = 0;
 
+var titleOver, goToMenu, endScore;
+
 var Game = {
     preload: function() {
         game.load.image('background', 'assets/images/black.png');
@@ -21,6 +23,8 @@ var Game = {
         game.load.image('kamikaze', 'assets/images/enemy1.png');
         game.load.spritesheet('kaboom', 'assets/images/explode.png', 128, 128);
         game.load.bitmapFont('carrier_command', 'assets/fonts/carrier_command.png', 'assets/fonts/carrier_command.xml');
+        game.load.image('titleOver', 'assets/images/gameOver.png');
+        game.load.image('goToMenu', 'assets/images/goToMenu.png');
     },
 
     create: function() {
@@ -285,6 +289,17 @@ var Game = {
     },
 
     endGame: function() {
-        this.state.start('GameOver');
+        titleOver = game.add.sprite(game.world.centerX, game.world.centerY-60, 'titleOver');
+        titleOver.anchor.set(0.5,0.5);
+        endScore = game.add.bitmapText(game.world.centerX, game.world.centerY, 'carrier_command', "", 18);
+        endScore.anchor.set(0.5,0.5);
+        endScore.text = "Your score is " + score; 
+        goToMenu = game.add.button(game.world.centerX, game.world.centerY+60, 'goToMenu', this.goToMenu, this);
+        goToMenu.anchor.set(0.5,0.5);
+        game.paused = true;
+    },
+
+    goToMenu: function() {
+        this.state.start("Menu", true, false);
     }
 };
