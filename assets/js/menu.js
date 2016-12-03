@@ -1,4 +1,4 @@
-var star, texture,start_game, records, title,
+var star, texture, start_game, records, title,
     speed = 15, distance = 300,
     max = 50,
     xx = [], yy = [], zz = [],

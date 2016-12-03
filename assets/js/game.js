@@ -273,7 +273,7 @@ var Game = {
         var explosionObj, explosionEnemy;
         enemy.kill();
         explosionEnemy = explosions.getFirstExists(false);
-        explosionEnemy.reset(kamikaze.body.x, kamikaze.body.y);
+        explosionEnemy.reset(enemy.body.x, enemy.body.y);
         explosionEnemy.play('kaboom', 30, false, true);
         obj.damage(1);   
         health.text = "Health: " + obj.health;

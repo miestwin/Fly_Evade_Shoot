@@ -1,7 +1,4 @@
-var starr, texturer, back, records_title,
-    speedr = 15, distancer = 300,
-    maxr = 50,
-    xxr = [], yyr = [], zzr = [];
+var back, records_title;
 
 var Records = {
     preload: function() {
@@ -12,14 +9,14 @@ var Records = {
     },
 
     create: function() {
-        starr = game.make.sprite(0,0,'tinystar');
-        texturer = game.add.renderTexture(900, 600, 'texture');
-        game.add.sprite(0,0,texturer);
+        star = game.make.sprite(0, 0, 'tinystar');
+        texture = game.add.renderTexture(900, 600, 'texture');
+        game.add.sprite(0, 0, texture);
 
-        for(let i = 0; i < maxr; i++) {
-            xxr[i] = Math.floor(Math.random() * 900) - 400;
-            yyr[i] = Math.floor(Math.random() * 600) - 300;
-            zzr[i] = Math.floor(Math.random() * 1700) - 100;
+        for(let i = 0; i < max; i++) {
+            xx[i] = Math.floor(Math.random() * 900) - 400;
+            yy[i] = Math.floor(Math.random() * 600) - 300;
+            zz[i] = Math.floor(Math.random() * 1700) - 100;
         }
 
         records_title = game.add.sprite(game.world.centerX, game.world.centerY-200, 'records_title');
@@ -32,20 +29,20 @@ var Records = {
     },
 
     update: function() {
-        texturer.clear();
+        texture.clear();
 
-        for(let i = 0; i < maxr; i++) {
-            let perspective = distancer / (distancer - zzr[i]);
-            let x = game.world.centerX + xxr[i] * perspective;
-            let y = game.world.centerY + yyr[i] * perspective;
+        for(let i = 0; i < max; i++) {
+            let perspective = distance / (distance - zz[i]);
+            let x = game.world.centerX + xx[i] * perspective;
+            let y = game.world.centerY + yy[i] * perspective;
 
-            zzr[i] += speedr;
+            zz[i] += speed;
 
-            if(zzr[i] > 300) {
-                zzr[i] -= 600;
+            if(zz[i] > 300) {
+                zz[i] -= 600;
             }
 
-            texturer.renderXY(starr, x, y);
+            texture.renderXY(star, x, y);
         }
     },
 
