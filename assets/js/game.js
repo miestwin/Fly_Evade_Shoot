@@ -289,13 +289,15 @@ var Game = {
     },
 
     endGame: function() {
-        titleOver = game.add.sprite(game.world.centerX, game.world.centerY-60, 'titleOver');
+        titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
         titleOver.anchor.set(0.5,0.5);
-        endScore = game.add.bitmapText(game.world.centerX, game.world.centerY, 'carrier_command', "", 18);
+        titleOver.fixedToCamera = true;
+        endScore = game.add.bitmapText(game.camera.width / 2, game.camera.height / 2, 'carrier_command', "Your score is " + score, 18);
         endScore.anchor.set(0.5,0.5);
-        endScore.text = "Your score is " + score; 
-        goToMenu = game.add.button(game.world.centerX, game.world.centerY+60, 'goToMenu', this.goToMenu, this);
+        endScore.fixedToCamera = true;;
+        goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.goToMenu, this);
         goToMenu.anchor.set(0.5,0.5);
+        goToMenu.fixedToCamera = true;
         game.paused = true;
     },
 
