@@ -59,7 +59,7 @@ var Menu = {
     },
 
     startGame: function() {
-        this.state.start('Game', true, false);
+        this.state.start('Game'/*, true, false*/);
     },
 
     showRecords: function() {

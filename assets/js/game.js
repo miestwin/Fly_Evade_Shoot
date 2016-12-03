@@ -28,12 +28,19 @@ var Game = {
     },
 
     create: function() {
+        score = 0;
+        
         game.add.tileSprite(0, 0, 2400, 1800, 'background');
         game.world.setBounds(0, 0, 2400, 1800);
 
         this.createPlayer();
 
         game.camera.follow(player);
+
+        this.createExplosion();
+        this.createAsteroids();
+        this.createUfo();
+        this.createKamikaze();
 
         scoreText = game.add.bitmapText(10, 10, 'carrier_command', "Score: " + score, 15);
         scoreText.anchor.set(0,0);
@@ -42,26 +49,6 @@ var Game = {
         health = game.add.bitmapText(10, 35, 'carrier_command', "Health: " + player.health, 15);
         health.anchor.set(0,0);
         health.fixedToCamera = true;
-
-        titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
-        titleOver.anchor.set(0.5,0.5);
-        titleOver.fixedToCamera = true;
-        titleOver.visible = false;
-
-        endScore = game.add.bitmapText(game.camera.width / 2, game.camera.height / 2, 'carrier_command', "Your score is " + score, 18);
-        endScore.anchor.set(0.5,0.5);
-        endScore.fixedToCamera = true;
-        endScore.visible = false;
-        
-        goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.backToMenu, this);
-        goToMenu.anchor.set(0.5,0.5);
-        goToMenu.fixedToCamera = true;
-        goToMenu.visible = false;
-
-        this.createExplosion();
-        this.createAsteroids();
-        this.createUfo();
-        this.createKamikaze();
 
         cursors = game.input.keyboard.createCursorKeys();
         fireButton = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
@@ -307,11 +294,26 @@ var Game = {
     },
 
     endGame: function() {
-        game.paused = true;
-        endScore.text = "Your score is " + score;
-        titleOver.visible = true;
-        endScore.visible = true;
-        goToMenu.visible = true;
+        asteroids.callAll('kill');
+        ufos.callAll('kill');
+        kamikaze.callAll('kill');
+        player.kill();
+        scoreText.kill();
+        health.kill();
+        ufoBullets.callAll('kill');
+        
+        titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
+        titleOver.anchor.set(0.5,0.5);
+        titleOver.fixedToCamera = true;
+
+        endScore = game.add.bitmapText(game.camera.width / 2, game.camera.height / 2, 'carrier_command', "Your score is " + score, 18);
+        endScore.anchor.set(0.5,0.5);
+        endScore.fixedToCamera = true;
+
+        goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.backToMenu, this);
+        goToMenu.anchor.set(0.5,0.5);
+        goToMenu.fixedToCamera = true;
+        game.world.setBounds(0, 0, 900, 600);
     },
 
     backToMenu: function() {
