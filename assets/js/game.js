@@ -43,6 +43,21 @@ var Game = {
         health.anchor.set(0,0);
         health.fixedToCamera = true;
 
+        titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
+        titleOver.anchor.set(0.5,0.5);
+        titleOver.fixedToCamera = true;
+        titleOver.visible = false;
+
+        endScore = game.add.bitmapText(game.camera.width / 2, game.camera.height / 2, 'carrier_command', "Your score is " + score, 18);
+        endScore.anchor.set(0.5,0.5);
+        endScore.fixedToCamera = true;
+        endScore.visible = false;
+        
+        goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.backToMenu, this);
+        goToMenu.anchor.set(0.5,0.5);
+        goToMenu.fixedToCamera = true;
+        goToMenu.visible = false;
+
         this.createExplosion();
         this.createAsteroids();
         this.createUfo();
@@ -261,6 +276,7 @@ var Game = {
             explosionObj.scale.setTo(1,1);
             explosionObj.reset(obj.body.x, obj.body.y);
             explosionObj.play('kaboom', 30, false, true);
+            this.endGame();
         }
     },
 
@@ -271,6 +287,7 @@ var Game = {
         explosion = explosions.getFirstExists(false);
         explosion.reset(obj.body.x, obj.body.y);
         explosion.play('kaboom', 30, false, true);
+        this.endGame();
     },
 
     collisionWithKamikaze: function(enemy, obj) {
@@ -285,23 +302,19 @@ var Game = {
             explosionObj = explosions.getFirstExists(false);
             explosionObj.reset(obj.body.x, obj.body.y);
             explosionObj.play('kaboom', 30, false, true);
+            this.endGame();
         }
     },
 
     endGame: function() {
         game.paused = true;
-        titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
-        titleOver.anchor.set(0.5,0.5);
-        titleOver.fixedToCamera = true;
-        endScore = game.add.bitmapText(game.camera.width / 2, game.camera.height / 2, 'carrier_command', "Your score is " + score, 18);
-        endScore.anchor.set(0.5,0.5);
-        endScore.fixedToCamera = true;;
-        goToMenu = game.add.button(game.camera.width / 2, (game.camera.height / 2) + 60, 'goToMenu', this.goToMenu, this);
-        goToMenu.anchor.set(0.5,0.5);
-        goToMenu.fixedToCamera = true;
+        endScore.text = "Your score is " + score;
+        titleOver.visible = true;
+        endScore.visible = true;
+        goToMenu.visible = true;
     },
 
-    goToMenu: function() {
+    backToMenu: function() {
         this.state.start("Menu", true, false);
     }
 };
