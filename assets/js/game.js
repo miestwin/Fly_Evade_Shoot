@@ -4,7 +4,7 @@ var cursors, fireButton, escButton;
 
 var friendAndFoe, asteroids, maxAsteroids = 1,
     ufos, maxUfos = 2, ufoBullets, ufoFiringTime = 0, ufoDamage = 2,
-    kamikaze, maxKamikaze = 20;
+    kamikaze, maxKamikaze = 30;
 
 var explosions;
 
@@ -13,6 +13,8 @@ var scoreText, health, score = 0, time;
 var titleOver, goToMenu, endScore;
 
 var waves;
+
+var LaserBlasts;
 
 var Game = {
     preload: function() {
@@ -27,11 +29,13 @@ var Game = {
         game.load.bitmapFont('carrier_command', 'assets/fonts/carrier_command.png', 'assets/fonts/carrier_command.xml');
         game.load.image('titleOver', 'assets/images/gameOver.png');
         game.load.image('goToMenu', 'assets/images/goToMenu.png');
+        game.load.audio('LaserBlasts', 'assets/audio/LaserBlasts.mp3');
     },
 
     create: function() {
         score = 0;
-        
+        LaserBlasts = game.add.audio('LaserBlasts', 0.3);
+
         game.add.tileSprite(0, 0, 2400, 1800, 'background');
         game.world.setBounds(0, 0, 2400, 1800);
 
@@ -60,7 +64,7 @@ var Game = {
         fireButton = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
         escButton = this.input.keyboard.addKey(Phaser.KeyCode.ESC);
 
-        waves = game.time.events.loop(game.rnd.integerInRange(3000,5000), this.spawnEnemies, this);
+        waves = game.time.events.loop(game.rnd.integerInRange(20000,30000), this.spawnEnemies, this);
     },
 
     update: function() {
@@ -93,24 +97,26 @@ var Game = {
         }.bind(this));
 
         kamikaze.forEachAlive(function(enemy) {
-            this.kamikazeFollow(enemy);
+            if(game.physics.arcade.distanceBetween(player, enemy) < enemy.noticeRange) {
+                game.physics.arcade.moveToObject(enemy, player, 200);
+            }
         }.bind(this));
 
         game.physics.arcade.overlap(bullets, asteroids, this.collisionWithPlayerBullet, null, this);
         game.physics.arcade.overlap(bullets, ufos, this.collisionWithPlayerBullet, null, this);
         game.physics.arcade.overlap(bullets, kamikaze, this.collisionWithPlayerBullet, null, this);
 
-        game.physics.arcade.overlap(asteroids, player, this.collisionWithAsteroids, null, this);
-        game.physics.arcade.overlap(kamikaze, player, this.collisionWithKamikaze, null, this);
+        //game.physics.arcade.collide(asteroids, player, this.collisionWithAsteroids, null, this);
+        //game.physics.arcade.collide(kamikaze, player, this.collisionWithKamikaze, null, this);
 
-        game.physics.arcade.overlap(ufoBullets, player, this.collisionWithUfoBullet, null, this);
+        //game.physics.arcade.overlap(ufoBullets, player, this.collisionWithUfoBullet, null, this);
 
         time.text = "Time: " + (game.time.events.duration/1000);
     },
 
     createPlayer: function() {
         player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-        player.health = 15;
+        player.health = 50;
         player.scale.setTo(0.5,0.5);
         player.anchor.set(0.5,0.5);
         game.physics.arcade.enable(player);
@@ -163,8 +169,16 @@ var Game = {
 
     spawnAsteroids: function() {  
         for(let i = 0; i < maxAsteroids; i++) {
-            var asteroid = asteroids.create(120 + Math.random() * 2280, 120 + Math.random() * 1600, 'asteroid');
-            asteroid.health = 50;
+            let x = 50 + Math.random() * 2400;
+            let y = 50 + Math.random() * 1800;
+            while(x > player.body.x - 200 && x < player.body.x + 200) {
+                x = 50 + Math.random() * 2400; 
+            }
+            while(y > player.body.y - 200 && y < player.body.y + 200) {
+                y = 50 + Math.random() * 1800;
+            }
+            var asteroid = asteroids.create(x, y, 'asteroid');
+            asteroid.health = 15;
             asteroid.body.angularVelocity = game.rnd.integerInRange(0, 200);
             asteroid.anchor.set(0.5,0.5);
             asteroid.body.collideWorldBounds = true;
@@ -192,14 +206,22 @@ var Game = {
 
     spawnUfos: function() {
         for(let i = 0; i < maxUfos; i++) {
-            var ufo = ufos.create(120 + Math.random() * 2280, 120 + Math.random() * 1600, 'ufo');
-            ufo.health = 30;
+            let x = 100 + Math.random() * 2400;
+            let y = 100 + Math.random() * 1800;
+            while(x > player.body.x - 200 && x < player.body.x + 200) {
+                x = 100 + Math.random() * 2400; 
+            }
+            while(y > player.body.y - 200 && y < player.body.y + 200) {
+                y = 100 + Math.random() * 1800;
+            }
+            var ufo = ufos.create(x, y, 'ufo');
+            ufo.health = 10;
             ufo.noticeRange = 300;
             ufo.body.angularVelocity = game.rnd.integerInRange(0, 200);
             ufo.anchor.set(0.5,0.5);
             ufo.body.collideWorldBounds = true;
             ufo.body.bounce.set(0.5);
-            ufo.animations.add('kaboom',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 30, false);
+            //ufo.animations.add('kaboom',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 30, false);
             var randomAngle = game.math.degToRad(game.rnd.angle());
             var randomVelocity = game.rnd.integerInRange(50, 150);
             game.physics.arcade.velocityFromRotation(randomAngle, randomVelocity, ufo.body.velocity);
@@ -209,6 +231,7 @@ var Game = {
     fireUfoBullet: function(ufo) {
         var bullet = ufoBullets.getFirstExists(false);
         if(bullet) {
+            LaserBlasts.play();
             bullet.scale.setTo(1.8,1.8);
             var length = ufo.width * 0.5;
             var x = ufo.body.x + length;
@@ -223,17 +246,28 @@ var Game = {
         kamikaze = game.add.group();
         kamikaze.enableBody = true;
         kamikaze.physicsBodyType = Phaser.Physics.ARCADE;
-        kamikaze.scale.setTo(0.3,0.3);
         this.spawnKamikaze();
     },
 
     spawnKamikaze: function() {
         for(let i = 0; i < maxKamikaze; i++) {
-            var kamikaze_ = kamikaze.create(100 + Math.random() * 600, 100 + Math.random() * 200, 'kamikaze');
+            let x = 50 + Math.random() * 2400;
+            let y = 50 + Math.random() * 1800;
+            while(x > player.body.x - 200 && x < player.body.x + 200) {
+                x = 50 + Math.random() * 2400; 
+            }
+            while(y > player.body.y - 200 && y < player.body.y + 200) {
+                y = 50 + Math.random() * 1800;
+            }
+            var kamikaze_ = kamikaze.create(x, y, 'kamikaze');
             kamikaze_.health = 1;
+            kamikaze_.noticeRange = 300;
             kamikaze_.anchor.setTo(0.5,0.5);
             kamikaze_.body.collideWorldBounds = true;
             kamikaze_.body.bounce.set(0.5);
+            kamikaze_.body.velocity.x = Math.floor(Math.random() * 151) + 50;
+            kamikaze_.body.velocity.y = Math.floor(Math.random() * 151) + 50;
+            kamikaze_.scale.setTo(0.3,0.3);
         }
     },
 
@@ -287,20 +321,21 @@ var Game = {
 
     collisionWithAsteroids: function(asteroid, obj) {
         var explosion;
-        obj.kill();
         health.text = "Health: " + 0;
         explosion = explosions.getFirstExists(false);
         explosion.reset(obj.body.x, obj.body.y);
         explosion.play('kaboom', 30, false, true);
+        obj.kill();
         this.endGame();
     },
 
     collisionWithKamikaze: function(enemy, obj) {
         var explosionObj, explosionEnemy;
-        enemy.kill();
         explosionEnemy = explosions.getFirstExists(false);
         explosionEnemy.reset(enemy.body.x, enemy.body.y);
+        explosionEnemy.scale.setTo(0.6,0.6);
         explosionEnemy.play('kaboom', 30, false, true);
+        enemy.kill();
         obj.damage(1);   
         health.text = "Health: " + obj.health;
         if(obj.health <= 0) {
@@ -359,7 +394,7 @@ var Game = {
                     }
                     if(score > recordsTab[i]) {
                         recordsTab.splice(i, 0, score)
-                        recordsTab.splice(9, 1);
+                        recordsTab.splice(10, 1);
                         break;
                     }
                 }
