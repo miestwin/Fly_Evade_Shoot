@@ -47,11 +47,22 @@ var Records = {
     },
 
     getRecords: function() {
+        var recordsTab = [];
         if(typeof(Storage) !== 'undefined') {
-            var tab = JSON.parse(localStorage.getItem('records'));
-            for(let i = 0; i < tab.length; i++) {
-                let text = game.add.bitmapText(game.world.centerX, (game.world.centerY-136)+(i*30), 'carrier_command', ((i+1) + "." + " " + tab[i]), 18);
-                text.anchor.set(0.5,0.5);
+            if(localStorage.getItem('records') !== null) {
+                recordsTab = JSON.parse(localStorage.getItem('records'));
+                for(let i = 0; i < recordsTab.length; i++) {
+                    let text = game.add.bitmapText(game.world.centerX, (game.world.centerY-136)+(i*30), 'carrier_command', ((i+1) + "." + " " + recordsTab[i]), 18);
+                    text.anchor.set(0.5,0.5);
+                }
+            } else {
+                recordsTab.length = 10;
+                recordsTab.fill(0, 0, 10);
+                localStorage.setItem("records", JSON.stringify(recordsTab));
+                for(let i = 0; i < recordsTab.length; i++) {
+                    let text = game.add.bitmapText(game.world.centerX, (game.world.centerY-136)+(i*30), 'carrier_command', ((i+1) + "." + " " + recordsTab[i]), 18);
+                    text.anchor.set(0.5,0.5);
+                }
             }
         } else {
             let text = game.add.bitmapText(game.world.centerX, game.world.centerY, 'carrier_command', "YOUR BROWSER DON'T SUPPORT LOCALSTORAGE", 18);

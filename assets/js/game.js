@@ -8,9 +8,11 @@ var friendAndFoe, asteroids, maxAsteroids = 1,
 
 var explosions;
 
-var scoreText, health, score = 0;
+var scoreText, health, score = 0, time;
 
 var titleOver, goToMenu, endScore;
+
+var waves;
 
 var Game = {
     preload: function() {
@@ -50,9 +52,15 @@ var Game = {
         health.anchor.set(0,0);
         health.fixedToCamera = true;
 
+        time = game.add.bitmapText(10, 55, 'carrier_command', "Time: ", 15);
+        time.anchor.set(0,0);
+        time.fixedToCamera = true;
+
         cursors = game.input.keyboard.createCursorKeys();
         fireButton = this.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
         escButton = this.input.keyboard.addKey(Phaser.KeyCode.ESC);
+
+        waves = game.time.events.loop(game.rnd.integerInRange(3000,5000), this.spawnEnemies, this);
     },
 
     update: function() {
@@ -96,6 +104,8 @@ var Game = {
         game.physics.arcade.overlap(kamikaze, player, this.collisionWithKamikaze, null, this);
 
         game.physics.arcade.overlap(ufoBullets, player, this.collisionWithUfoBullet, null, this);
+
+        time.text = "Time: " + (game.time.events.duration/1000);
     },
 
     createPlayer: function() {
@@ -231,6 +241,14 @@ var Game = {
         enemy.rotation = game.physics.arcade.moveToObject(enemy, player, 100);
     },
 
+    spawnEnemies: function() {
+        console.log(1);
+        this.killAll();
+        this.createAsteroids();
+        this.createUfo();
+        this.createKamikaze();
+    },
+
     collisionWithPlayerBullet: function (bullet, enemy) {
         var explosionBullet, explosionEnemy;
         explosionBullet = explosions.getFirstExists(false);
@@ -294,13 +312,14 @@ var Game = {
     },
 
     endGame: function() {
-        asteroids.callAll('kill');
-        ufos.callAll('kill');
-        kamikaze.callAll('kill');
+        game.time.events.remove(waves);
+
+        this.killAll();
         player.kill();
+        bullets.callAll('kill');
         scoreText.kill();
         health.kill();
-        ufoBullets.callAll('kill');
+        time.kill();
         
         titleOver = game.add.sprite(game.camera.width / 2, (game.camera.height / 2) - 60, 'titleOver');
         titleOver.anchor.set(0.5,0.5);
@@ -314,9 +333,42 @@ var Game = {
         goToMenu.anchor.set(0.5,0.5);
         goToMenu.fixedToCamera = true;
         game.world.setBounds(0, 0, 900, 600);
+
+        this.saveScore();
+    },
+
+    killAll: function() {
+        asteroids.callAll('kill');
+        ufos.callAll('kill');
+        kamikaze.callAll('kill');
+        ufoBullets.callAll('kill');
     },
 
     backToMenu: function() {
         this.state.start("Menu", true, false);
+    },
+
+    saveScore() {
+        var recordsTab = [];
+        if(typeof(Storage) !== 'undefined') {
+            if(localStorage.getItem('records') !== null) {
+                recordsTab = JSON.parse(localStorage.getItem('records'));
+                for(let i = 0; i < 10; i++) {
+                    if(score === recordsTab[i]) {
+                        break;
+                    }
+                    if(score > recordsTab[i]) {
+                        recordsTab.splice(i, 0, score)
+                        recordsTab.splice(9, 1);
+                        break;
+                    }
+                }
+                localStorage.setItem("records", JSON.stringify(recordsTab));
+            } else {
+                recordsTab.length = 10;
+                recordsTab.fill(0, 0, 10);
+                localStorage.setItem("records", JSON.stringify(recordsTab));
+            }
+        }
     }
 };

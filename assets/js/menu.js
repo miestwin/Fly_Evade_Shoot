@@ -10,6 +10,7 @@ var Menu = {
         game.load.image('start', 'assets/images/start_game.png');
         game.load.image('records', 'assets/images/records.png');
         game.load.image('title', 'assets/images/title.png');
+        game.load.bitmapFont('carrier_command', 'assets/fonts/carrier_command.png', 'assets/fonts/carrier_command.xml');
         game.load.audio('platformer2', 'assets/audio/Platformer2.mp3');
     },
 
@@ -38,6 +39,11 @@ var Menu = {
 
         records = game.add.button(game.world.centerX, game.world.centerY+110, 'records', this.showRecords, this);
         records.anchor.set(0.5,0.5);
+
+        var controlText1 = game.add.bitmapText(game.world.centerX, game.world.height - 52, 'carrier_command', "RIGHT/LEFT ARROW - rotation, UP ARROW - fly, DOWN ARROW - stop", 10);
+        controlText1.anchor.set(0.5,0.5);
+        var controlText2 = game.add.bitmapText(game.world.centerX, game.world.height - 20, 'carrier_command', "SPACE - shoot, ESC - back to menu", 10);
+        controlText2.anchor.set(0.5,0.5);
     },
 
     update: function() {
