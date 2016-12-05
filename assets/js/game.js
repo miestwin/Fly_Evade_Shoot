@@ -75,15 +75,15 @@ var Game = {
 
     update: function() {
         if (cursors.up.isDown) {
-            game.physics.arcade.accelerationFromRotation(player.rotation, 300, player.body.acceleration);
+            game.physics.arcade.accelerationFromRotation(player.rotation, 350, player.body.acceleration);
         } else {
             player.body.acceleration.set(0);
         }
 
         if (cursors.left.isDown) {
-            player.body.angularVelocity = -300;
+            player.body.angularVelocity = -450;
         } else if (cursors.right.isDown) {
-            player.body.angularVelocity = 300;
+            player.body.angularVelocity = 450;
         } else {
             player.body.angularVelocity = 0;
         }
@@ -116,6 +116,7 @@ var Game = {
         game.physics.arcade.overlap(player, kamikaze, this.collisionWithKamikaze, null, this);
 
         game.physics.arcade.overlap(player, ufoBullets, this.collisionWithUfoBullet, null, this);
+        game.physics.arcade.overlap(ufoBullets, asteroids, this.collisionUfoBulletWithAsteroids, null, this);
 
         time.text = "Time: " + (game.time.events.duration/1000);
     },
@@ -353,6 +354,15 @@ var Game = {
             explosionObj.play('kaboom', 30, false, true);
             this.endGame();
         }
+    },
+
+    collisionUfoBulletWithAsteroids: function(bullet, asteroid) {
+        var explosionBullet;
+        explosionBullet = explosions.getFirstExists(false);
+        explosionBullet.reset(enemy.body.x, enemy.body.y);
+        explosionBullet.scale.setTo(0.4,0.4);
+        explosionBullet.play('kaboom', 50, false, true);
+        bullet.kill();
     },
 
     endGame: function() {
