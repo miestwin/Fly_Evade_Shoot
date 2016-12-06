@@ -430,7 +430,7 @@ var Game = {
     collisionUfoBulletWithAsteroids: function(bullet, asteroid) {
         var explosionBullet;
         explosionBullet = explosions.getFirstExists(false);
-        explosionBullet.reset(enemy.body.x, enemy.body.y);
+        explosionBullet.reset(bullet.body.x, bullet.body.y);
         explosionBullet.scale.setTo(0.4,0.4);
         explosionBullet.play('kaboom', 50, false, true);
         bullet.kill();
