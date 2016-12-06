@@ -4,8 +4,8 @@ var cursors, fireButton, escButton;
 
 var friendAndFoe, asteroids, maxAsteroids = 2,
     ufos, maxUfos = 3, ufoBullets, ufoFiringTime = 0, ufoDamage = 5,
-    kamikaze, maxKamikaze = 30,
-    fighter, maxFighters = 10, fighterBullets, fighterFiringTime = 30, fighterDamage = 2;
+    kamikaze, maxKamikaze = 20,
+    fighter, maxFighters = 5, fighterBullets, fighterFiringTime = 30, fighterDamage = 2;
 
 var explosions;
 
@@ -106,15 +106,15 @@ var Game = {
             }
         }.bind(this));
 
-        kamikaze.forEachAlive(function(enemy) {
-            if(game.physics.arcade.distanceBetween(player, enemy) < enemy.noticeRange) {
-                enemy.rotation = game.physics.arcade.moveToObject(enemy, player, 200);
-            }
-        }.bind(this));
-
         fighter.forEachAlive(function(fighter) {
             if(game.physics.arcade.distanceBetween(player, fighter) < fighter.noticeRange && game.time.now > fighterFiringTime) {
                 this.fighterDogFight(fighter);
+            }
+        }.bind(this));
+
+        kamikaze.forEachAlive(function(enemy) {
+            if(game.physics.arcade.distanceBetween(player, enemy) < enemy.noticeRange) {
+                enemy.rotation = game.physics.arcade.moveToObject(enemy, player, 200);
             }
         }.bind(this));
 
