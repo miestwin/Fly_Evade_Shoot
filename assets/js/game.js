@@ -2,9 +2,10 @@ var player, playerDamage = 1, bullets, bulletTime = 0;
 
 var cursors, fireButton, escButton;
 
-var friendAndFoe, asteroids, maxAsteroids = 1,
-    ufos, maxUfos = 2, ufoBullets, ufoFiringTime = 0, ufoDamage = 5,
-    kamikaze, maxKamikaze = 30;
+var friendAndFoe, asteroids, maxAsteroids = 2,
+    ufos, maxUfos = 3, ufoBullets, ufoFiringTime = 0, ufoDamage = 5,
+    kamikaze, maxKamikaze = 30,
+    fighter, maxFighters = 10, fighterBullets, fighterFiringTime = 30, fighterDamage = 2;
 
 var explosions;
 
@@ -33,6 +34,8 @@ var Game = {
         game.load.audio('laser', 'assets/audio/scifi048.mp3');
         game.load.audio('ufoExplosion', 'assets/audio/ufoExplode.mp3');
         game.load.audio('kamikazeExplosion', 'assets/audio/kamikazeExplosion.mp3');
+        game.load.image('fighter', 'assets/images/enemyRed2.png');
+        game.load.image('fighterBullet', 'assets/images/laserSmall.png');
     },
 
     create: function() {
@@ -53,6 +56,7 @@ var Game = {
         this.createAsteroids();
         this.createUfo();
         this.createKamikaze();
+        this.createFighter();
 
         scoreText = game.add.bitmapText(10, 10, 'carrier_command', "Score: " + score, 15);
         scoreText.anchor.set(0,0);
@@ -108,15 +112,23 @@ var Game = {
             }
         }.bind(this));
 
+        fighter.forEachAlive(function(fighter) {
+            if(game.physics.arcade.distanceBetween(player, fighter) < fighter.noticeRange && game.time.now > fighterFiringTime) {
+                this.fighterDogFight(fighter);
+            }
+        }.bind(this));
+
         game.physics.arcade.overlap(bullets, asteroids, this.collisionWithPlayerBullet, null, this);
         game.physics.arcade.overlap(bullets, ufos, this.collisionWithPlayerBullet, null, this);
         game.physics.arcade.overlap(bullets, kamikaze, this.collisionWithPlayerBullet, null, this);
+        game.physics.arcade.overlap(bullets, fighter, this.collisionWithPlayerBullet, null, this);
 
         game.physics.arcade.collide(player, asteroids, this.collisionWithAsteroids, null, this);
         game.physics.arcade.overlap(player, kamikaze, this.collisionWithKamikaze, null, this);
 
         game.physics.arcade.overlap(player, ufoBullets, this.collisionWithUfoBullet, null, this);
         game.physics.arcade.overlap(ufoBullets, asteroids, this.collisionUfoBulletWithAsteroids, null, this);
+        game.physics.arcade.overlap(player, fighterBullets, this.collisionWithFighterBullet, null, this);
 
         time.text = "Time: " + (game.time.events.duration/1000);
     },
@@ -282,11 +294,70 @@ var Game = {
         enemy.rotation = game.physics.arcade.moveToObject(enemy, player, 100);
     },
 
+    createFighter: function() {
+        fighter = game.add.group();
+        fighter.enableBody = true;
+        fighter.physicsBodyType = Phaser.Physics.ARCADE;
+        fighterBullets = game.add.group();
+        fighterBullets.enableBody = true;
+        fighterBullets.physicsBodyType = Phaser.Physics.ARCADE;
+        fighterBullets.createMultiple(200, 'fighterBullet');
+        fighterBullets.setAll('anchor.x', 0);      
+        fighterBullets.setAll('anchor.y', 0.5);
+        fighterBullets.setAll('outOfBoundsKill', true);
+        fighterBullets.setAll('checkWorldBounds', true);
+        this.spawnFighter();
+    },
+
+    spawnFighter: function() {
+        for(let i = 0; i < maxFighters; i++) {
+            let x = 50 + Math.random() * 2400;
+            let y = 50 + Math.random() * 1800;
+            while(x > player.body.x - 200 && x < player.body.x + 200) {
+                x = 50 + Math.random() * 2400;
+            }
+            while(y > player.body.y - 200 && y < player.body.y + 200) {
+                y = 50 + Math.random() * 1800;
+            }
+            var fighter_ = fighter.create(x, y, 'fighter');
+            fighter_.health = 1;
+            fighter_.noticeRange = 600;
+            fighter_.anchor.setTo(0.5,0.5);
+            fighter_.body.collideWorldBounds = true;
+            fighter_.body.bounce.set(0.5);
+            fighter_.body.velocity.x = Math.floor(Math.random() * 151) + 50;
+            fighter_.body.velocity.y = Math.floor(Math.random() * 151) + 50;
+            fighter_.scale.setTo(0.5,0.5);
+        }
+    },
+
+    fireFighterBullet: function(fighter) {
+        var bullet = fighterBullets.getFirstExists(false);
+        if(bullet)
+        {
+            LaserBlasts.play();
+            bullet.scale.setTo(0.5,0.5);
+            var length = fighter.width * 0.5;
+            var x = fighter.x + (Math.cos(player.rotation) * length);
+            var y = fighter.y + (Math.sin(player.rotation) * length);
+            bullet.reset(x, y);
+            bullet.rotation = fighter.rotation;              
+            game.physics.arcade.velocityFromRotation(fighter.rotation, 500, bullet.body.velocity);
+            fighterFiringTime = game.time.now + 1000;
+        }
+    },
+   
+    fighterDogFight: function(fighter) {
+        fighter.rotation = game.physics.arcade.moveToObject(fighter, player, 80);
+        this.fireFighterBullet(fighter);
+    },
+
     spawnEnemies: function() {
         this.killAll();
         this.createAsteroids();
         this.createUfo();
         this.createKamikaze();
+        this.createFighter();
     },
 
     collisionWithPlayerBullet: function (bullet, enemy) {
@@ -365,6 +436,24 @@ var Game = {
         bullet.kill();
     },
 
+    collisionWithFighterBullet: function(pla, bullet) {
+        var explosionBullet, explosionObj;
+        explosionBullet = explosions.getFirstExists(false);
+        explosionBullet.scale.setTo(0.6,0.6);
+        explosionBullet.reset(bullet.body.x, bullet.body.y);
+        explosionBullet.play('kaboom', 50, false, true);
+        bullet.kill();
+        pla.damage(fighterDamage);
+        health.text = "Health: " + pla.health;
+        if(pla.health <= 0) {
+            explosionObj = explosions.getFirstExists(false);
+            explosionObj.scale.setTo(1,1);
+            explosionObj.reset(pla.body.x, pla.body.y);
+            explosionObj.play('kaboom', 30, false, true);
+            this.endGame();
+        }
+    },
+
     endGame: function() {
         game.time.events.remove(waves);
 
@@ -396,6 +485,7 @@ var Game = {
         ufos.callAll('kill');
         kamikaze.callAll('kill');
         ufoBullets.callAll('kill');
+        fighter.callAll('kill');
     },
 
     backToMenu: function() {
