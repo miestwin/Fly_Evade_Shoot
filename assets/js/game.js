@@ -481,10 +481,36 @@ var Game = {
     },
 
     killAll: function() {
+        var explosionEnemy;
+        asteroids.forEachAlive(function(enemy) {
+            explosionEnemy = explosions.getFirstExists(false);
+            explosionEnemy.reset(enemy.body.x, enemy.body.y);
+            explosionEnemy.scale.setTo(1,1);
+            explosionEnemy.play('kaboom', 60, false, true);     
+        });
         asteroids.callAll('kill');
+        ufos.forEachAlive(function(enemy) {
+            explosionEnemy = explosions.getFirstExists(false);
+            explosionEnemy.reset(enemy.body.x, enemy.body.y);
+            explosionEnemy.scale.setTo(1.2,1.2);
+            explosionEnemy.play('kaboom', 60, false, true);     
+        });
         ufos.callAll('kill');
+        kamikaze.forEachAlive(function(enemy) {
+            //kamikazeExplosion.play();
+            explosionEnemy = explosions.getFirstExists(false);
+            explosionEnemy.reset(enemy.body.x, enemy.body.y);
+            explosionEnemy.scale.setTo(0.6,0.6);
+            explosionEnemy.play('kaboom', 60, false, true);     
+        });
         kamikaze.callAll('kill');
         ufoBullets.callAll('kill');
+        fighter.forEachAlive(function(enemy) {
+            explosionEnemy = explosions.getFirstExists(false);
+            explosionEnemy.reset(enemy.body.x, enemy.body.y);
+            explosionEnemy.scale.setTo(0.6,0.6);
+            explosionEnemy.play('kaboom', 60, false, true);     
+        });
         fighter.callAll('kill');
     },
 
